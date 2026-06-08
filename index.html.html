@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seoul Center — Report Tuần 01–07/06/2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0b0e14;
+    --bg2: #11151e;
+    --bg3: #181d29;
+    --surface: #1e2433;
+    --surface2: #252c3d;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --text2: #8b91a8;
+    --text3: #555d75;
+    --gold: #c9a84c;
+    --gold2: #e8c96a;
+    --gold-dim: rgba(201,168,76,0.12);
+    --red: #e05c5c;
+    --red-dim: rgba(224,92,92,0.12);
+    --amber: #d4874a;
+    --amber-dim: rgba(212,135,74,0.12);
+    --green: #4cad7f;
+    --green-dim: rgba(76,173,127,0.12);
+    --blue: #5b8dee;
+    --blue-dim: rgba(91,141,238,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 24px 60px;
+  }
+
+  /* ---------- HEADER ---------- */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--gold) 0%, #8a5e1f 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; color: #fff; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 600;
+    color: var(--text); letter-spacing: -0.3px;
+  }
+  .brand-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .header-right { text-align: right; }
+  .report-week {
+    font-size: 13px; color: var(--text2);
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    padding: 6px 14px; border-radius: 20px;
+    display: inline-block;
+  }
+  .report-week span { color: var(--gold); font-weight: 500; }
+
+  /* ---------- ALERT BANNER ---------- */
+  .alert-banner {
+    background: var(--red-dim);
+    border: 0.5px solid rgba(224,92,92,0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 28px;
+    font-size: 13px; color: var(--text);
+  }
+  .alert-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink:0; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ---------- METRIC GRID ---------- */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .kpi:hover { border-color: var(--border2); }
+  .kpi::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .kpi.gold::before { background: linear-gradient(90deg, var(--gold), transparent); }
+  .kpi.red::before  { background: linear-gradient(90deg, var(--red),  transparent); }
+  .kpi.amber::before{ background: linear-gradient(90deg, var(--amber),transparent); }
+  .kpi.green::before{ background: linear-gradient(90deg, var(--green),transparent); }
+  .kpi.blue::before { background: linear-gradient(90deg, var(--blue), transparent); }
+
+  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .kpi-value { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; line-height: 1; }
+  .kpi-value.gold  { color: var(--gold2); }
+  .kpi-value.red   { color: var(--red); }
+  .kpi-value.amber { color: var(--amber); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.blue  { color: var(--blue); }
+  .kpi-unit { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .kpi-tag {
+    display: inline-block; margin-top: 8px;
+    font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500;
+  }
+  .tag-red   { background: var(--red-dim);   color: var(--red);   }
+  .tag-amber { background: var(--amber-dim); color: var(--amber); }
+  .tag-green { background: var(--green-dim); color: var(--green); }
+
+  /* ---------- TWO COLUMN LAYOUT ---------- */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } }
+
+  .three-col { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 18px; }
+  @media (max-width: 860px) { .three-col { grid-template-columns: 1fr; } }
+
+  /* ---------- CARD ---------- */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 500; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block; width: 3px; height: 12px;
+    background: var(--gold); border-radius: 2px;
+  }
+
+  /* ---------- REGION TABLE ---------- */
+  .region-table { width: 100%; border-collapse: collapse; }
+  .region-table th {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text3); font-weight: 500;
+    padding: 0 0 10px; text-align: left; border-bottom: 0.5px solid var(--border);
+  }
+  .region-table th:not(:first-child) { text-align: right; }
+  .region-table td {
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px; color: var(--text);
+    vertical-align: middle;
+  }
+  .region-table td:not(:first-child) { text-align: right; }
+  .region-table tr:last-child td { border-bottom: none; }
+  .region-name { font-weight: 500; }
+  .cpa-bar-cell { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+  .cpa-bar-bg { width: 60px; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .cpa-bar-fill { height: 100%; border-radius: 3px; }
+  .badge { display:inline-flex; align-items:center; font-size:10px; padding: 2px 8px; border-radius:4px; font-weight:500; }
+
+  /* ---------- CHART WRAPPER ---------- */
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* ---------- INSIGHT LIST ---------- */
+  .insight-list { display: flex; flex-direction: column; gap: 10px; }
+  .insight-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--bg3); border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px; line-height: 1.55; color: var(--text2);
+    border: 0.5px solid var(--border);
+  }
+  .insight-icon { font-size: 15px; flex-shrink:0; margin-top:1px; }
+  .insight-item strong { color: var(--text); font-weight: 500; }
+
+  /* ---------- ACTION ITEMS ---------- */
+  .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .action-item {
+    background: var(--bg3); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .action-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gold-dim); color: var(--gold);
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .action-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .action-text strong { color: var(--text); font-weight: 500; display: block; margin-bottom: 2px; }
+
+  /* ---------- FOOTER ---------- */
+  .footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 11px; color: var(--text3);
+    border-top: 0.5px solid var(--border);
+    padding-top: 20px;
+  }
+
+  /* ---------- SECTION DIVIDER ---------- */
+  .section-gap { margin-bottom: 18px; }
+
+  /* ROAS gauge */
+  .gauge-wrap { display:flex; align-items:center; justify-content:center; padding: 8px 0 0; }
+  .gauge-label { text-align:center; margin-top: 6px; }
+
+  /* Animate in */
+  @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+  .kpi { animation: fadeUp 0.4s ease both; }
+  .kpi:nth-child(1){animation-delay:.05s} .kpi:nth-child(2){animation-delay:.1s}
+  .kpi:nth-child(3){animation-delay:.15s} .kpi:nth-child(4){animation-delay:.2s}
+  .kpi:nth-child(5){animation-delay:.25s} .kpi:nth-child(6){animation-delay:.3s}
+  .kpi:nth-child(7){animation-delay:.35s}
+  .card { animation: fadeUp 0.5s ease both; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">SC</div>
+    <div>
+      <div class="brand-name">Seoul Center</div>
+      <div class="brand-sub">Performance Dashboard — Google Ads</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="report-week">Tuần <span>01 – 07 tháng 6, 2026</span></div>
+  </div>
+</div>
+
+<!-- ALERT -->
+<div class="alert-banner">
+  <div class="alert-dot"></div>
+  <div><strong style="color:var(--red)">Cảnh báo:</strong> ROAS mới mới đang ở mức 0.57 — dưới ngưỡng hòa vốn. CIR 176,9% cần được xử lý ngay trong tuần tới.</div>
+</div>
+
+<!-- KPI ROW -->
+<div class="kpi-grid">
+  <div class="kpi gold">
+    <div class="kpi-label">Tổng chi GG Ads</div>
+    <div class="kpi-value gold">290,98M</div>
+    <div class="kpi-unit">VNĐ / tuần</div>
+  </div>
+  <div class="kpi blue">
+    <div class="kpi-label">Tổng Data (Leads)</div>
+    <div class="kpi-value blue">936</div>
+    <div class="kpi-unit">leads thu về</div>
+    <div class="kpi-tag tag-amber">699 blank (74,7%)</div>
+  </div>
+  <div class="kpi amber">
+    <div class="kpi-label">CPA trung bình</div>
+    <div class="kpi-value amber">310.876</div>
+    <div class="kpi-unit">₫ / lead</div>
+    <div class="kpi-tag tag-amber">Trung bình</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-label">CIR</div>
+    <div class="kpi-value red">176,9%</div>
+    <div class="kpi-unit">mục tiêu &lt; 40%</div>
+    <div class="kpi-tag tag-red">Vượt ngưỡng</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-label">ROAS mới mới</div>
+    <div class="kpi-value red">0.57</div>
+    <div class="kpi-unit">mục tiêu ≥ 1.0</div>
+    <div class="kpi-tag tag-red">Lỗ quảng cáo</div>
+  </div>
+  <div class="kpi amber">
+    <div class="kpi-label">ROAS mới</div>
+    <div class="kpi-value amber">0.85</div>
+    <div class="kpi-unit">mục tiêu ≥ 1.0</div>
+    <div class="kpi-tag tag-amber">Chưa hòa vốn</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">Doanh thu (Mới)</div>
+    <div class="kpi-value green">247,7M</div>
+    <div class="kpi-unit">VNĐ ghi nhận</div>
+  </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="two-col section-gap">
+  <!-- CPA BY REGION BAR -->
+  <div class="card">
+    <div class="card-title">CPA theo khu vực (₫)</div>
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="cpaChart" role="img" aria-label="Biểu đồ CPA theo khu vực">CPA: Tây Nguyên 940K, Miền Trung 1.36M, Miền Bắc 1.4M, Đông Nam Bộ 1.86M, Miền Tây 1.93M, HCM 15.5M</canvas>
+    </div>
+  </div>
+  <!-- DATA VOLUME PIE -->
+  <div class="card">
+    <div class="card-title">Phân bổ Data theo khu vực</div>
+    <div class="chart-wrap" style="height:240px">
+      <canvas id="dataChart" role="img" aria-label="Biểu đồ phân bổ data theo khu vực">Data: Miền Trung 44, Tây Nguyên 34, Miền Tây 27, Đông Nam Bộ 17, HCM 7, Miền Bắc 5, Phòng khám 90, Blank 699</canvas>
+    </div>
+    <div id="dataLegend" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- REGION TABLE + SPEND -->
+<div class="three-col">
+  <div class="card">
+    <div class="card-title">Chi tiết khu vực</div>
+    <table class="region-table">
+      <thead>
+        <tr>
+          <th>Khu vực</th>
+          <th>Chi phí</th>
+          <th>Data</th>
+          <th>CPA</th>
+          <th>Đánh giá</th>
+        </tr>
+      </thead>
+      <tbody id="regionTable"></tbody>
+    </table>
+  </div>
+
+  <!-- SPEND DONUT -->
+  <div class="card">
+    <div class="card-title">Tỉ trọng ngân sách</div>
+    <div class="chart-wrap" style="height:200px">
+      <canvas id="spendChart" role="img" aria-label="Biểu đồ tỉ trọng ngân sách theo khu vực"></canvas>
+    </div>
+    <div id="spendLegend" style="display:flex; flex-direction:column; gap:6px; margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- INSIGHTS + ACTIONS -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-title">Chẩn đoán tuần</div>
+    <div class="insight-list">
+      <div class="insight-item">
+        <span class="insight-icon">🔴</span>
+        <div><strong>ROAS 0.57 — đang lỗ quảng cáo</strong> Mỗi 1đ chi GG Ads chỉ thu về 0.57đ doanh thu mới mới. Cần tăng deal chốt hoặc cắt vùng hiệu suất thấp ngay.</div>
+      </div>
+      <div class="insight-item">
+        <span class="insight-icon">🔴</span>
+        <div><strong>699 Blank data — 74,7% leads mất tracking</strong> Phần lớn data không gán được khu vực. Toàn bộ tối ưu ngân sách theo vùng đang thiếu dữ liệu gốc. Fix UTM là ưu tiên số 1.</div>
+      </div>
+      <div class="insight-item">
+        <span class="insight-icon">🟡</span>
+        <div><strong>HCM CPA ảo 15,5 triệu</strong> Do dồn chi phí toàn KV HCM vào 7 data phòng khám. Cần tách conversion action riêng cho Spa vs Phòng khám.</div>
+      </div>
+      <div class="insight-item">
+        <span class="insight-icon">🟡</span>
+        <div><strong>Miền Tây & Đông Nam Bộ CPA cao</strong> CPA 1,86M–1,93M cần đánh giá lại LDP và offer. Có thể tạm giảm NS và tối ưu CVR trước khi scale tiếp.</div>
+      </div>
+      <div class="insight-item">
+        <span class="insight-icon">🟢</span>
+        <div><strong>Tây Nguyên — tín hiệu tốt nhất tuần</strong> CPA 940K với 34 leads. Khu vực duy nhất CPA dưới 1 triệu. Scale thêm 20–30% ngân sách tuần tới để kiểm tra.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Kế hoạch hành động tuần tới</div>
+    <div class="action-grid">
+      <div class="action-item">
+        <div class="action-num">1</div>
+        <div class="action-text"><strong>Fix UTM & Blank data</strong> Kiểm tra toàn bộ UTM params trên Pmax, GDN, Search. Đảm bảo mỗi campaign gắn đúng utm_campaign phân biệt khu vực.</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">2</div>
+        <div class="action-text"><strong>Tách tracking HCM</strong> Tạo riêng conversion action Spa vs Phòng khám. Thêm hidden field entity_type vào form để phân loại data chính xác.</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">3</div>
+        <div class="action-text"><strong>Scale Tây Nguyên +20–30%</strong> Khu vực CPA tốt nhất. Tăng NS thí nghiệm, theo dõi CPA trong 3–4 ngày trước khi quyết định scale tiếp.</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">4</div>
+        <div class="action-text"><strong>Build LDP Sẹo Rỗ & Phòng khám</strong> Hoàn thiện LDP theo khung chuẩn: Pain → Giải pháp → BOD video → Social proof → Offer → CTA.</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">5</div>
+        <div class="action-text"><strong>Scale Pmax + Dynamic Search</strong> Mở rộng search intent, bật Google AI khai thác keyword mới từ nội dung LDP. Đẩy thêm NS Camp Maps.</div>
+      </div>
+      <div class="action-item">
+        <div class="action-num">6</div>
+        <div class="action-text"><strong>Tối ưu tốc độ LDP mobile</strong> Ưu tiên Core Web Vitals. Kiểm tra toàn bộ qua Landing Checker: ldp.seoulcenter.com.vn</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Seoul Center — Performance Report &nbsp;·&nbsp; Tuần 01–07/06/2026 &nbsp;·&nbsp; Google Ads Dashboard
+</div>
+
+<script>
+  const regionData = [
+    { name: 'Tây Nguyên',   cost: 31988117,  data: 34, cpa: 940827   },
+    { name: 'Miền Tây',     cost: 51995092,  data: 27, cpa: 1925744  },
+    { name: 'Miền Trung',   cost: 59864621,  data: 44, cpa: 1360560  },
+    { name: 'Đông Nam Bộ',  cost: 31549923,  data: 17, cpa: 1855878  },
+    { name: 'Hồ Chí Minh',  cost: 108547554, data: 7,  cpa: 15506793 },
+    { name: 'Miền Bắc',     cost: 7035083,   data: 5,  cpa: 1407017  },
+  ];
+
+  const COLORS = ['#c9a84c','#5b8dee','#4cad7f','#d4874a','#e05c5c','#a07fe0'];
+
+  function fmt(n) { return n.toLocaleString('vi-VN'); }
+
+  // ---- CPA BAR CHART ----
+  const cpaCtx = document.getElementById('cpaChart').getContext('2d');
+  const sorted = [...regionData].sort((a,b) => a.cpa - b.cpa);
+  new Chart(cpaCtx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(r => r.name),
+      datasets: [{
+        label: 'CPA (₫)',
+        data: sorted.map(r => r.cpa),
+        backgroundColor: sorted.map(r =>
+          r.cpa < 1200000 ? 'rgba(76,173,127,0.7)' :
+          r.cpa < 2000000 ? 'rgba(212,135,74,0.7)' : 'rgba(224,92,92,0.7)'
+        ),
+        borderColor: sorted.map(r =>
+          r.cpa < 1200000 ? '#4cad7f' :
+          r.cpa < 2000000 ? '#d4874a' : '#e05c5c'
+        ),
+        borderWidth: 1,
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => '  ' + fmt(ctx.raw) + ' ₫' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#555d75', font: { size: 10 }, callback: v => (v/1e6).toFixed(1)+'M' },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'transparent' }
+        },
+        y: {
+          ticks: { color: '#8b91a8', font: { size: 12 } },
+          grid: { display: false },
+          border: { color: 'transparent' }
+        }
+      }
+    }
+  });
+
+  // ---- DATA PIE (excluding blank/phòng khám for region view) ----
+  const dataCtx = document.getElementById('dataChart').getContext('2d');
+  const dataSorted = [...regionData].sort((a,b) => b.data - a.data);
+  const dataLegendEl = document.getElementById('dataLegend');
+  new Chart(dataCtx, {
+    type: 'doughnut',
+    data: {
+      labels: dataSorted.map(r => r.name),
+      datasets: [{
+        data: dataSorted.map(r => r.data),
+        backgroundColor: COLORS.map(c => c + 'cc'),
+        borderColor: COLORS,
+        borderWidth: 1,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => '  ' + ctx.label + ': ' + ctx.raw + ' leads' } }
+      }
+    }
+  });
+  dataSorted.forEach((r, i) => {
+    dataLegendEl.innerHTML += `<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8b91a8">
+      <span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i]};flex-shrink:0"></span>${r.name} <span style="color:#e8eaf0;font-weight:500">${r.data}</span>
+    </span>`;
+  });
+
+  // ---- SPEND DONUT ----
+  const spendCtx = document.getElementById('spendChart').getContext('2d');
+  const spendLegendEl = document.getElementById('spendLegend');
+  const totalSpend = regionData.reduce((s,r) => s+r.cost, 0);
+  new Chart(spendCtx, {
+    type: 'doughnut',
+    data: {
+      labels: regionData.map(r => r.name),
+      datasets: [{
+        data: regionData.map(r => r.cost),
+        backgroundColor: COLORS.map(c => c + 'bb'),
+        borderColor: COLORS,
+        borderWidth: 1,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          label: ctx => '  ' + (ctx.raw/1e6).toFixed(1) + 'M (' + (ctx.raw/totalSpend*100).toFixed(1) + '%)'
+        }}
+      }
+    }
+  });
+  regionData.forEach((r, i) => {
+    const pct = (r.cost/totalSpend*100).toFixed(1);
+    spendLegendEl.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+      <span style="display:flex;align-items:center;gap:6px;color:#8b91a8">
+        <span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i]};flex-shrink:0"></span>${r.name}
+      </span>
+      <span style="color:#e8eaf0;font-family:'DM Mono',monospace;font-size:11px">${pct}%</span>
+    </div>`;
+  });
+
+  // ---- REGION TABLE ----
+  const tbody = document.getElementById('regionTable');
+  const maxCPA = Math.max(...regionData.map(r=>r.cpa));
+  [...regionData].sort((a,b) => a.cpa - b.cpa).forEach(r => {
+    const barW = Math.round((r.cpa / maxCPA) * 56);
+    const [badgeClass, badgeLabel] =
+      r.cpa < 1200000 ? ['badge tag-green','Tốt'] :
+      r.cpa < 2000000 ? ['badge tag-amber','TB'] :
+      ['badge tag-red','Cao'];
+    const barColor =
+      r.cpa < 1200000 ? '#4cad7f' :
+      r.cpa < 2000000 ? '#d4874a' : '#e05c5c';
+    tbody.innerHTML += `<tr>
+      <td class="region-name">${r.name}</td>
+      <td style="color:#8b91a8;font-size:12px">${(r.cost/1e6).toFixed(1)}M</td>
+      <td style="font-family:'DM Mono',monospace">${r.data}</td>
+      <td>
+        <div class="cpa-bar-cell">
+          <span style="font-family:'DM Mono',monospace;font-size:12px">${(r.cpa/1e6).toFixed(2)}M</span>
+          <div class="cpa-bar-bg"><div class="cpa-bar-fill" style="width:${barW}px;background:${barColor}"></div></div>
+        </div>
+      </td>
+      <td><span class="${badgeClass}">${badgeLabel}</span></td>
+    </tr>`;
+  });
+</script>
+</body>
+</html>
